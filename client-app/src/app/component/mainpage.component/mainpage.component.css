@@ -1,0 +1,35 @@
+.main-card {
+  margin: 40px auto;
+  max-width: 720px;
+  direction: rtl;
+  text-align: center;
+  padding: 16px;
+}
+
+mat-card-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+mat-card-subtitle {
+  margin-top: 6px;
+  color: rgba(0,0,0,0.6);
+}
+
+.buttons-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  min-width: 160px;
+  height: 48px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  direction: rtl;
+}
