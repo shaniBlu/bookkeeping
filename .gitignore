@@ -146,3 +146,8 @@ build/
 # Local env files
 .env
 .env.* 
+*.log
+# package-lock.json
+package-lock.json
+# package.json
+package.json
