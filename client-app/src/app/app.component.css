@@ -1,0 +1,38 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-toolbar {
+  direction: rtl;
+}
+
+.toolbar-title {
+  margin-right: 16px;
+  font-weight: 600;
+}
+
+.sidenav-container {
+  flex: 1;
+  height: calc(100vh - 64px);
+}
+
+.app-sidenav {
+  width: 250px;
+  direction: rtl;
+}
+
+.sidenav-content {
+  padding: 16px;
+  direction: rtl;
+}
+
+.content-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+mat-nav-list a.active {
+  background: rgba(0,0,0,0.06);
+}

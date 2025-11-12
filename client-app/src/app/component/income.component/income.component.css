@@ -1,0 +1,9 @@
+
+.income-card { margin: 20px; padding: 20px; }
+.filters { display:flex; gap:16px; margin-bottom:16px; }
+.add-section { background:#fafafa; padding:16px; border-radius:8px; margin-top:16px; max-width:700px; }
+.form-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+.pagination { display:flex; gap:12px; align-items:center; justify-content:center; margin-top:16px; }
+.positive-amount { color:rgb(12, 12, 111); font-weight:500; }
+.incon { color: rgb(12, 12, 111);}
+:host { direction: rtl; }

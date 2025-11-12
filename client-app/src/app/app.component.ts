@@ -1,15 +1,29 @@
 import { Component } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
-import { ComponentNameComponent } from './component/component-name/component-name.component';
-import { ApiService } from './services/api';
+import { RouterOutlet, RouterModule } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSidenav } from '@angular/material/sidenav';
+import { ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-root',
-  template: '<app-component-name></app-component-name>',
   standalone: true,
-  imports: [ComponentNameComponent, HttpClientModule],
-  providers: [ApiService]
+  imports: [
+    RouterOutlet,
+    RouterModule,
+    MatToolbarModule,
+    MatSidenavModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule
+  ],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'client-app';
+  title = 'ניהול הנהלת חשבונות';
+  @ViewChild('sidenav') sidenav!: MatSidenav;
 }
