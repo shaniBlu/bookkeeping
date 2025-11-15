@@ -8,14 +8,31 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #sidenav mode="side" opened class="app-sidenav">
     <mat-nav-list>
-      <a mat-list-item routerLink="/" routerLinkActive="active" (click)="sidenav.close()">
+
+      <a mat-list-item
+         routerLink="/"
+         routerLinkActive="active"
+         (click)="sidenav.close()">
         <mat-icon>home</mat-icon>
         <span>דף הבית</span>
       </a>
-      <a mat-list-item routerLink="/income" routerLinkActive="active" (click)="sidenav.close()">
+
+      <a mat-list-item
+         routerLink="/income"
+         routerLinkActive="active"
+         (click)="sidenav.close()">
         <mat-icon>payments</mat-icon>
         <span>הכנסות</span>
       </a>
+
+      <a mat-list-item
+         routerLink="/statistics"
+         routerLinkActive="active"
+         (click)="sidenav.close()">
+        <mat-icon>query_stats</mat-icon>
+        <span>גרפים</span>
+      </a>
+
     </mat-nav-list>
   </mat-sidenav>
 

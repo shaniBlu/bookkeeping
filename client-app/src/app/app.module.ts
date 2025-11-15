@@ -17,6 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { StatisticsComponent } from './component/statistics.component/statistics.component';
 
 @NgModule({
   imports: [
@@ -29,6 +30,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     // קומפוננטות Standalone במקום declarations
     AppComponent,
     IncomeComponent,
+    StatisticsComponent,
 
     // מודולים של Material
     MatButtonModule,

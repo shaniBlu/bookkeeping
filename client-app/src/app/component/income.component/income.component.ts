@@ -33,35 +33,30 @@ import { IncomeService, Income, Client } from '../../services/income.service';
   ]
 })
 export class IncomeComponent implements OnInit {
-  // Data
+
   incomes: Income[] = [];
   filteredIncomes: Income[] = [];
   pagedIncomes: Income[] = [];
   displayedColumns = ['date', 'description', 'amount', 'actions'];
 
-  // Pagination
   currentPage = 0;
   itemsPerPage = 6;
 
-  // Filters
   selectedMonth: number | null = null;
   selectedYear: number | null = null;
   years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
   months = Array.from({ length: 12 }, (_, i) => i + 1);
 
-  // Clients & Forms
   clients: Client[] = [];
   selectedClientId: string | null = null;
   newClient: Client = { name: '', businessName: '', email: '' };
   newIncome: Income = { description: '', amount: 0, date: new Date(), clientId: '' };
 
-  // UI State
   isAdding = false;
   showClientForm = false;
   showIncomeForm = false;
   isLoading = false;
 
-  // Receipt flow state (last saved income only)
   lastSavedIncome: Income | null = null;
   generatedReceiptUrl: string | null = null;
   isGeneratingReceipt = false;
@@ -77,7 +72,9 @@ export class IncomeComponent implements OnInit {
   loadIncomes(): void {
     this.incomeService.getIncomes().subscribe({
       next: data => {
-        this.incomes = (data || []).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        this.incomes = (data || []).sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
         this.applyFilter();
       },
       error: () => this.showMessage('שגיאה בטעינת הכנסות', true)
@@ -86,7 +83,7 @@ export class IncomeComponent implements OnInit {
 
   loadClients(): void {
     this.incomeService.getClients().subscribe({
-      next: data => this.clients = data || [],
+      next: data => (this.clients = data || []),
       error: () => this.showMessage('שגיאה בטעינת לקוחות', true)
     });
   }
@@ -94,18 +91,24 @@ export class IncomeComponent implements OnInit {
   applyFilter(): void {
     this.filteredIncomes = this.incomes.filter(income => {
       const d = new Date(income.date);
+
       if (this.selectedYear && this.selectedMonth) {
         return d.getFullYear() === this.selectedYear && d.getMonth() + 1 === this.selectedMonth;
       }
       if (this.selectedYear) return d.getFullYear() === this.selectedYear;
-      if (this.selectedMonth) return d.getMonth() + 1 === this.selectedMonth && d.getFullYear() === new Date().getFullYear();
+      if (this.selectedMonth)
+        return (
+          d.getMonth() + 1 === this.selectedMonth &&
+          d.getFullYear() === new Date().getFullYear()
+        );
+
       return true;
     });
+
     this.currentPage = 0;
     this.updatePagedIncomes();
   }
 
-  // <-- תיקון: הפונקציה שנעדרה
   updatePagedIncomes(): void {
     const start = this.currentPage * this.itemsPerPage;
     this.pagedIncomes = this.filteredIncomes.slice(start, start + this.itemsPerPage);
@@ -129,13 +132,16 @@ export class IncomeComponent implements OnInit {
     this.isAdding = true;
     this.showClientForm = true;
     this.showIncomeForm = false;
+
     this.newClient = { name: '', businessName: '', email: '' };
     this.newIncome = { description: '', amount: 0, date: new Date(), clientId: '' };
+
     this.selectedClientId = null;
   }
 
   onClientSelect(clientId: string | null): void {
     this.selectedClientId = clientId;
+
     if (clientId) {
       this.showClientForm = false;
       this.showIncomeForm = true;
@@ -151,14 +157,18 @@ export class IncomeComponent implements OnInit {
       this.showMessage('יש למלא את כל פרטי הלקוח', true);
       return;
     }
+
     this.isLoading = true;
+
     this.incomeService.addClient(this.newClient).subscribe({
       next: client => {
         this.clients.push(client);
         this.selectedClientId = client._id || null;
         this.newIncome.clientId = this.selectedClientId || '';
+
         this.showClientForm = false;
         this.showIncomeForm = true;
+
         this.isLoading = false;
         this.showMessage('לקוח נשמר בהצלחה');
       },
@@ -174,15 +184,18 @@ export class IncomeComponent implements OnInit {
       this.showMessage('יש למלא תיאור וסכום', true);
       return;
     }
+
     this.isLoading = true;
     this.newIncome.clientId = this.selectedClientId || '';
     this.newIncome.date = new Date();
 
     this.incomeService.addIncome(this.newIncome).subscribe({
-      next: (saved: Income) => {
+      next: saved => {
         this.isLoading = false;
-        this.lastSavedIncome = saved; // שמירת ההכנסה שנשמרה עכשיו
+
+        this.lastSavedIncome = saved;
         this.generatedReceiptUrl = null;
+
         this.showMessage('✅ ההכנסה נוספה בהצלחה! ניתן להפיק/לשלוח קבלה');
         this.cancelAdd();
         this.loadIncomes();
@@ -194,16 +207,19 @@ export class IncomeComponent implements OnInit {
     });
   }
 
-  // יצירת קבלה עבור lastSavedIncome — מוריד blob ופותח טאב חדש
   generateReceiptForLast(): void {
     if (!this.lastSavedIncome || !this.lastSavedIncome._id) return;
+
     this.isGeneratingReceipt = true;
+
     this.incomeService.generateReceipt(this.lastSavedIncome._id).subscribe({
       next: (blob: Blob) => {
         this.isGeneratingReceipt = false;
+
         const url = window.URL.createObjectURL(blob);
         this.generatedReceiptUrl = url;
         window.open(url, '_blank');
+
         this.showMessage('✅ קבלה הונפקה ונפתחה בחלון חדש');
       },
       error: () => {
@@ -213,15 +229,18 @@ export class IncomeComponent implements OnInit {
     });
   }
 
-  // שליחת הקבלה לשרת כדי שישלח למייל הלקוח
   sendReceiptForLast(): void {
     if (!this.lastSavedIncome || !this.lastSavedIncome._id) return;
+
     this.isSendingReceipt = true;
+
     this.incomeService.sendReceipt(this.lastSavedIncome._id).subscribe({
       next: () => {
         this.isSendingReceipt = false;
         this.showMessage('✅ הקבלה נשלחה למייל הלקוח');
+
         this.lastSavedIncome = null;
+
         if (this.generatedReceiptUrl) {
           window.URL.revokeObjectURL(this.generatedReceiptUrl);
           this.generatedReceiptUrl = null;
@@ -237,6 +256,7 @@ export class IncomeComponent implements OnInit {
   deleteIncome(id?: string): void {
     if (!id) return;
     if (!confirm('האם למחוק?')) return;
+
     this.incomeService.deleteIncome(id).subscribe({
       next: () => {
         this.showMessage('✅ נמחק');
@@ -250,12 +270,13 @@ export class IncomeComponent implements OnInit {
     this.isAdding = false;
     this.showClientForm = false;
     this.showIncomeForm = false;
+
     this.selectedClientId = null;
+
     this.newClient = { name: '', businessName: '', email: '' };
     this.newIncome = { description: '', amount: 0, date: new Date(), clientId: '' };
   }
 
-  // <-- פונקציה שחסרה בתבנית
   getTotalAmount(): number {
     return this.filteredIncomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
   }
