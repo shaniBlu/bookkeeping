@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -21,9 +22,9 @@ export interface Client {
   providedIn: 'root'
 })
 export class IncomeService {
-  // חשוב: להתאים לכתובת השרת שלך - server.js משתמש ב /api/incomes ו /api/clients
   private incomesUrl = 'http://localhost:5000/api/incomes';
   private clientsUrl = 'http://localhost:5000/api/clients';
+  private receiptsUrl = 'http://localhost:5000/api/receipts';
 
   constructor(private http: HttpClient) {}
 
@@ -46,4 +47,14 @@ export class IncomeService {
   addClient(client: Client): Observable<Client> {
     return this.http.post<Client>(this.clientsUrl, client);
   }
-} 
+
+  // הגשת בקשה לקבלת PDF כרצף בינארי (blob)
+  generateReceipt(incomeId: string): Observable<Blob> {
+    return this.http.get(`${this.receiptsUrl}/generate/${incomeId}`, { responseType: 'blob' });
+  }
+
+  // בקשה לשליחת הקבלה למייל (שרת מבצע את השליחה)
+  sendReceipt(incomeId: string): Observable<any> {
+    return this.http.post(`${this.receiptsUrl}/send/${incomeId}`, {});
+  }
+}

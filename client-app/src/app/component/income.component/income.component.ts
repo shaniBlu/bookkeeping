@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { IncomeService, Income, Client } from '../../services/income.service';
 
@@ -27,32 +28,44 @@ import { IncomeService, Income, Client } from '../../services/income.service';
     MatButtonModule,
     MatIconModule,
     MatTableModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ]
 })
 export class IncomeComponent implements OnInit {
-  protected readonly Math = Math;
+  // Data
   incomes: Income[] = [];
   filteredIncomes: Income[] = [];
   pagedIncomes: Income[] = [];
   displayedColumns = ['date', 'description', 'amount', 'actions'];
 
+  // Pagination
   currentPage = 0;
   itemsPerPage = 6;
 
+  // Filters
   selectedMonth: number | null = null;
   selectedYear: number | null = null;
   years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
   months = Array.from({ length: 12 }, (_, i) => i + 1);
 
+  // Clients & Forms
   clients: Client[] = [];
   selectedClientId: string | null = null;
   newClient: Client = { name: '', businessName: '', email: '' };
   newIncome: Income = { description: '', amount: 0, date: new Date(), clientId: '' };
 
+  // UI State
   isAdding = false;
   showClientForm = false;
   showIncomeForm = false;
+  isLoading = false;
+
+  // Receipt flow state (last saved income only)
+  lastSavedIncome: Income | null = null;
+  generatedReceiptUrl: string | null = null;
+  isGeneratingReceipt = false;
+  isSendingReceipt = false;
 
   constructor(private incomeService: IncomeService, private snackBar: MatSnackBar) {}
 
@@ -73,7 +86,7 @@ export class IncomeComponent implements OnInit {
 
   loadClients(): void {
     this.incomeService.getClients().subscribe({
-      next: data => (this.clients = data || []),
+      next: data => this.clients = data || [],
       error: () => this.showMessage('שגיאה בטעינת לקוחות', true)
     });
   }
@@ -85,19 +98,14 @@ export class IncomeComponent implements OnInit {
         return d.getFullYear() === this.selectedYear && d.getMonth() + 1 === this.selectedMonth;
       }
       if (this.selectedYear) return d.getFullYear() === this.selectedYear;
-      if (this.selectedMonth)
-        return d.getMonth() + 1 === this.selectedMonth && d.getFullYear() === new Date().getFullYear();
+      if (this.selectedMonth) return d.getMonth() + 1 === this.selectedMonth && d.getFullYear() === new Date().getFullYear();
       return true;
     });
     this.currentPage = 0;
     this.updatePagedIncomes();
   }
 
-  // ✅ חישוב סכום כולל של השורות שמוצגות אחרי סינון
-  getTotalAmount(): number {
-    return this.filteredIncomes.reduce((sum, income) => sum + (income.amount || 0), 0);
-  }
-
+  // <-- תיקון: הפונקציה שנעדרה
   updatePagedIncomes(): void {
     const start = this.currentPage * this.itemsPerPage;
     this.pagedIncomes = this.filteredIncomes.slice(start, start + this.itemsPerPage);
@@ -143,6 +151,7 @@ export class IncomeComponent implements OnInit {
       this.showMessage('יש למלא את כל פרטי הלקוח', true);
       return;
     }
+    this.isLoading = true;
     this.incomeService.addClient(this.newClient).subscribe({
       next: client => {
         this.clients.push(client);
@@ -150,9 +159,13 @@ export class IncomeComponent implements OnInit {
         this.newIncome.clientId = this.selectedClientId || '';
         this.showClientForm = false;
         this.showIncomeForm = true;
+        this.isLoading = false;
         this.showMessage('לקוח נשמר בהצלחה');
       },
-      error: () => this.showMessage('שגיאה בשמירת הלקוח', true)
+      error: () => {
+        this.isLoading = false;
+        this.showMessage('שגיאה בשמירת הלקוח', true);
+      }
     });
   }
 
@@ -161,34 +174,76 @@ export class IncomeComponent implements OnInit {
       this.showMessage('יש למלא תיאור וסכום', true);
       return;
     }
+    this.isLoading = true;
     this.newIncome.clientId = this.selectedClientId || '';
     this.newIncome.date = new Date();
+
     this.incomeService.addIncome(this.newIncome).subscribe({
-      next: () => {
-        this.showMessage('הכנסה נוספה בהצלחה');
+      next: (saved: Income) => {
+        this.isLoading = false;
+        this.lastSavedIncome = saved; // שמירת ההכנסה שנשמרה עכשיו
+        this.generatedReceiptUrl = null;
+        this.showMessage('✅ ההכנסה נוספה בהצלחה! ניתן להפיק/לשלוח קבלה');
         this.cancelAdd();
         this.loadIncomes();
       },
-      error: () => this.showMessage('שגיאה בשמירת ההכנסה', true)
+      error: () => {
+        this.isLoading = false;
+        this.showMessage('שגיאה בשמירת ההכנסה', true);
+      }
     });
   }
 
-  deleteIncome(id: string | undefined): void {
-    if (!id) return;
-    if (confirm('האם למחוק?')) {
-      this.incomeService.deleteIncome(id).subscribe({
-        next: () => {
-          this.incomes = this.incomes.filter(income => income._id !== id);
-          this.filteredIncomes = this.filteredIncomes.filter(income => income._id !== id);
-          this.updatePagedIncomes();
-          this.showMessage('נמחק בהצלחה');
-        },
-        error: err => {
-          console.error('שגיאה במחיקה:', err);
-          this.showMessage('שגיאה במחיקה', true);
+  // יצירת קבלה עבור lastSavedIncome — מוריד blob ופותח טאב חדש
+  generateReceiptForLast(): void {
+    if (!this.lastSavedIncome || !this.lastSavedIncome._id) return;
+    this.isGeneratingReceipt = true;
+    this.incomeService.generateReceipt(this.lastSavedIncome._id).subscribe({
+      next: (blob: Blob) => {
+        this.isGeneratingReceipt = false;
+        const url = window.URL.createObjectURL(blob);
+        this.generatedReceiptUrl = url;
+        window.open(url, '_blank');
+        this.showMessage('✅ קבלה הונפקה ונפתחה בחלון חדש');
+      },
+      error: () => {
+        this.isGeneratingReceipt = false;
+        this.showMessage('שגיאה בהפקת קבלה', true);
+      }
+    });
+  }
+
+  // שליחת הקבלה לשרת כדי שישלח למייל הלקוח
+  sendReceiptForLast(): void {
+    if (!this.lastSavedIncome || !this.lastSavedIncome._id) return;
+    this.isSendingReceipt = true;
+    this.incomeService.sendReceipt(this.lastSavedIncome._id).subscribe({
+      next: () => {
+        this.isSendingReceipt = false;
+        this.showMessage('✅ הקבלה נשלחה למייל הלקוח');
+        this.lastSavedIncome = null;
+        if (this.generatedReceiptUrl) {
+          window.URL.revokeObjectURL(this.generatedReceiptUrl);
+          this.generatedReceiptUrl = null;
         }
-      });
-    }
+      },
+      error: () => {
+        this.isSendingReceipt = false;
+        this.showMessage('שגיאה בשליחת הקבלה', true);
+      }
+    });
+  }
+
+  deleteIncome(id?: string): void {
+    if (!id) return;
+    if (!confirm('האם למחוק?')) return;
+    this.incomeService.deleteIncome(id).subscribe({
+      next: () => {
+        this.showMessage('✅ נמחק');
+        this.loadIncomes();
+      },
+      error: () => this.showMessage('שגיאה במחיקה', true)
+    });
   }
 
   cancelAdd(): void {
@@ -200,10 +255,19 @@ export class IncomeComponent implements OnInit {
     this.newIncome = { description: '', amount: 0, date: new Date(), clientId: '' };
   }
 
+  // <-- פונקציה שחסרה בתבנית
+  getTotalAmount(): number {
+    return this.filteredIncomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
+  }
+
   private showMessage(msg: string, isError = false): void {
     this.snackBar.open(msg, 'סגור', {
-      duration: 3000,
-      panelClass: isError ? ['error-snackbar'] : ['success-snackbar']
+      duration: 4000,
+      panelClass: isError ? ['error-snackbar'] : ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
     });
   }
+
+  Math = Math;
 }

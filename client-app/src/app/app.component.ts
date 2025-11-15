@@ -7,11 +7,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav } from '@angular/material/sidenav';
 import { ViewChild } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
+    MatTooltipModule,
     RouterOutlet,
     RouterModule,
     MatToolbarModule,
