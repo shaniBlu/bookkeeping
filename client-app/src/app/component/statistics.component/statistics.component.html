@@ -1,0 +1,19 @@
+<h2 style="text-align:center; margin-top:20px;">📊 גרף הכנסות</h2>
+
+<div style="max-width: 600px; margin: auto;">
+
+    <label>סנן לפי:</label>
+    <select [(ngModel)]="filterType" (change)="onFilterChange()">
+        <option value="month">חודשים</option>
+        <option value="year">שנים</option>
+    </select>
+
+    <div style="margin-top:20px;">
+        <canvas baseChart
+            [type]="chartType"
+            [labels]="chartLabels"
+            [data]="chartData">
+        </canvas>
+    </div>
+
+</div>

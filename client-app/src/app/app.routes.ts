@@ -1,11 +1,10 @@
 import { Routes } from '@angular/router';
-import { MainpageComponent } from './component/mainpage.component/mainpage.component';
-import { IncomeComponent } from './component/income.component/income.component';
 
 export const routes: Routes = [
-  { path: '', component: MainpageComponent },
+  { path: '', loadComponent: () => import('./component/mainpage.component/mainpage.component').then(m => m.MainpageComponent) },
   { path: 'income', loadComponent: () => import('./component/income.component/income.component').then(m => m.IncomeComponent) },
+  { path: 'statistics', loadComponent: () => import('./component/statistics.component/statistics.component').then(m => m.StatisticsComponent) },
   { path: '**', redirectTo: '' }
-
 ];
+
 

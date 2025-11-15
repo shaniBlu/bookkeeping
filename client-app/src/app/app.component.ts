@@ -1,31 +1,27 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSidenav } from '@angular/material/sidenav';
-import { ViewChild } from '@angular/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-root',
   standalone: true,
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css',
   imports: [
-    MatTooltipModule,
-    RouterOutlet,
-    RouterModule,
     MatToolbarModule,
+    MatIconModule,
     MatSidenavModule,
     MatListModule,
-    MatIconModule,
-    MatButtonModule
-  ],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    MatButtonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive
+  ]
 })
 export class AppComponent {
-  title = 'ניהול הנהלת חשבונות';
-  @ViewChild('sidenav') sidenav!: MatSidenav;
+  title = 'מערכת הנהלת חשבונות';
 }
