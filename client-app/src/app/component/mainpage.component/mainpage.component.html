@@ -1,24 +1,29 @@
 <mat-card class="main-card">
   <mat-card-header>
     <mat-card-title>{{ title }}</mat-card-title>
-    <mat-card-subtitle>בחר פעולה כדי להמשיך</mat-card-subtitle>
   </mat-card-header>
 
   <mat-card-content>
     <div class="buttons-row">
-      <a routerLink="/income">
-        <button mat-raised-button color="primary" class="action-btn">
-          <mat-icon>payments</mat-icon>
-          הכנסות
-        </button>
-      </a>
+      <button
+        mat-raised-button
+        color="primary"
+        class="action-btn"
+        routerLink="/income"
+      >
+        <mat-icon>payments</mat-icon>
+        הכנסות
+      </button>
 
-      <a routerLink="/expenses">
-        <button mat-stroked-button color="accent" class="action-btn">
-          <mat-icon>money_off</mat-icon>
-          הוצאות
-        </button>
-      </a>
+      <button
+        mat-raised-button
+        color="primary"
+        class="action-btn"
+        routerLink="/expenses"
+      >
+        <mat-icon>money_off</mat-icon>
+        הוצאות
+      </button>
     </div>
   </mat-card-content>
 </mat-card>

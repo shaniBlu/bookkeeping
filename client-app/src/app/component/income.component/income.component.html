@@ -55,6 +55,27 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
 
+<div *ngIf="lastSavedIncome" class="receipt-panel mat-elevation-z2" style="margin-top:16px; padding:12px;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+    <div>
+      <strong>הכנסה שנשמרה:</strong>&nbsp; {{ lastSavedIncome.description }} — {{ lastSavedIncome.amount | number:'1.2-2' }} ₪
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button mat-raised-button color="accent" (click)="generateReceiptForLast()" [disabled]="isGeneratingReceipt">
+        <mat-icon>description</mat-icon>&nbsp; הפק קבלה
+      </button>
+      <button mat-raised-button color="primary" (click)="sendReceiptForLast()" [disabled]="isSendingReceipt">
+        <mat-icon>email</mat-icon>&nbsp; שלח קבלה למייל
+      </button>
+      <button mat-button (click)="lastSavedIncome = null">סגור</button>
+    </div>
+  </div>
+
+  <div *ngIf="generatedReceiptUrl" style="margin-top:12px;">
+    <a [href]="generatedReceiptUrl" target="_blank" rel="noopener">פתח קבלה שנוצרה</a>
+  </div>
+</div>
+
 <!-- ✅ שורה של סכום סופי מחוץ לטבלה -->
 <div class="total-row" style="text-align:right; font-weight:bold; margin-top:10px;">
   סה"כ: {{ getTotalAmount() | number:'1.2-2' }} ₪

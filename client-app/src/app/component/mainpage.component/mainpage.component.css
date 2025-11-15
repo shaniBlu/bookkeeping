@@ -9,6 +9,7 @@
 mat-card-title {
   font-size: 28px;
   font-weight: 700;
+  color: rgb(13, 13, 152);
 }
 
 mat-card-subtitle {
@@ -27,9 +28,10 @@ mat-card-subtitle {
 .action-btn {
   min-width: 160px;
   height: 48px;
-  font-size: 16px;
+  font-size: 19px;
   display: flex;
   align-items: center;
   gap: 8px;
   direction: rtl;
+  text-decoration: none;
 }
