@@ -1,0 +1,92 @@
+<div class="layout">
+
+  <!-- TOGGLE BUTTON -->
+  <button class="toggle-btn" (click)="toggleSidebar()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" [class.closed]="!sidebarOpen">
+
+    <div class="sidebar-header">
+      <button class="new-chat-btn" (click)="newChat()">+ NEW CHAT</button>
+    </div>
+
+    <div class="chat-list">
+      <div class="chat-item" *ngFor="let c of chatList" [class.active]="c._id === selectedChatId" (click)="loadChat(c)">
+
+        <span class="chat-title">{{ c.title }}</span>
+
+        <button class="trash-btn" (click)="deleteChat(c._id, $event)">
+          <mat-icon>delete</mat-icon>
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" [class.push]="sidebarOpen">
+
+    <div class="topbar">CHAT GPT</div>
+
+    <div class="chat-window">
+
+      <div *ngFor="let m of messages" class="msg" [ngClass]="m.from">
+        <div class="bubble" [innerHTML]="m.text | nl2br"></div>
+      </div>
+
+      <!-- typing animation ONLY under chat -->
+      <div class="typing" *ngIf="loading">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+    </div>
+
+    <!-- INPUT AREA GPT STYLE -->
+    <div class="input-area">
+
+      <div class="input-box">
+
+        <!-- EMOJI BUTTON -->
+        <button class="emoji-btn" (click)="toggleEmoji()">😊</button>
+
+        <div class="emoji-panel" *ngIf="showEmoji">
+          <span class="emoji" (click)="addEmoji('😀')">😀</span>
+          <span class="emoji" (click)="addEmoji('😂')">😂</span>
+          <span class="emoji" (click)="addEmoji('👍')">👍</span>
+          <span class="emoji" (click)="addEmoji('❤️')">❤️</span>
+        </div>
+
+        <!-- FILE UPLOAD BUTTON -->
+        <input type="file" hidden #fileInput (change)="onFileSelected($event)">
+        <button class="emoji-btn" (click)="fileInput.click()">
+          <mat-icon>attach_file</mat-icon>
+        </button>
+
+        <!-- MICROPHONE BUTTON -->
+        <div class="voice-container">
+  <button mat-icon-button (click)="startVoice()">
+    <mat-icon>{{ isRecording ? 'stop' : 'mic' }}</mat-icon>
+  </button>
+
+  <div *ngIf="isRecording" ></div>
+</div>
+
+        <!-- TEXTAREA -->
+        <textarea [(ngModel)]="question" placeholder="כתוב הודעה..." (keydown.enter)="enterSend($event)">
+    </textarea>
+
+      </div>
+
+      <button class="send-btn" [disabled]="loading" (click)="send()">שלח</button>
+
+    </div>
+
+
+  </div>
+
+</div>
